@@ -1,5 +1,18 @@
 extends layout
 
 block content
-  h1= title
-  p Welcome to #{title}
+    h1= title
+
+    div.panel.panel-default
+        div.panel-heading
+            h3.panel-title GET /user
+        div.panel-body
+            Panel content
+        div.panel-body
+            Panel content
+
+    div.panel.panel-default
+        div.panel-heading
+            h3.panel-title POST /user
+        div.panel-body
+            Panel content
