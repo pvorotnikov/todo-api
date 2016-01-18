@@ -2,6 +2,7 @@
 
 // load dependencies
 const mongoose = require('mongoose');
+const crypto = require('crypto');
 
 // Define our user schema
 const UserSchema = new mongoose.Schema({
@@ -26,29 +27,14 @@ UserSchema.pre('save', function(callback) {
     }
 
     // Password changed so we need to hash it
-    bcrypt.genSalt(5, (err, salt) => {
-        if (err) {
-            return callback(err);
-        }
-
-        bcrypt.hash(user.password, salt, null, (err, hash) => {
-            if (err) {
-                return callback(err);
-            }
-
-            user.password = hash;
-            callback();
-        });
-    });
+    let hash = crypto.createHash('md5').update(user.password).digest('hex');
+    user.password = hash;
+    callback();
 });
 
-UserSchema.methods.verifyPassword = function(password, cb) {
-    bcrypt.compare(password, this.password, (err, isMatch) => {
-        if (err) {
-            return cb(err);
-        }
-        cb(null, isMatch);
-    });
+UserSchema.methods.validPassword = function(password) {
+    let hash = crypto.createHash('md5').update(password).digest('hex');
+    return (this.password === hash);
 };
 
 // Export the Mongoose model

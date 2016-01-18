@@ -6,9 +6,10 @@ const Logger = require('./logger')('debug', 'auth-basic');
 
 const User = require('../models/user');
 
+
 passport.use(new BasicStrategy((username, password, callback) => {
 
-    Logger.debug('Checking credentials for user: %s', username);
+    Logger.info('Checking credentials for user: %s', username);
 
     User.findOne({ username: username }, (err, user) => {
         if (err) {
@@ -23,24 +24,16 @@ passport.use(new BasicStrategy((username, password, callback) => {
         }
 
         // Make sure the password is correct
-        user.verifyPassword(password, (err, isMatch) => {
-            if (err) {
-                Logger.error('Error', error);
-                return callback(err);
-            }
+        if (!user.validPassword(password)) {
+            Logger.error('Wrong password');
+            return callback(null, false), {message: 'Wrong password'};
+        }
 
-            // Password did not match
-            if (!isMatch) {
-                Logger.error('Wrong password');
-                return callback(null, false), {message: 'Wrong password'};
-            }
-
-            // Success
-            Logger.info('Successfully authenticated');
-            return callback(null, user);
-        });
+        // Success
+        Logger.info('Successfully authenticated');
+        return callback(null, user);
     });
 
 }));
 
-exports.isAuthenticated = passport.authenticate('basic', { session : false });
+module.exports = passport;
