@@ -32,6 +32,25 @@ module.exports = (app) => {
         });
     });
 
+    router.post('/validate', (req, res, next) => {
+
+        // get params
+        let username = req.body.username;
+        let password = req.body.password;
+
+        User.findOne({ username: username }, (err, user) => {
+            if (err) {
+                res.json(new ErrorResponse());
+            } else if (!user) {
+                res.json(new Response(false));
+            } else if (!user.validPassword(password)) {
+                res.json(new Response(false));
+            } else {
+                res.json(new Response(true));
+            }
+        });
+    });
+
     router.post(/^\/(\w+)\/(\w+)$/, (req, res, next) => {
 
         // get params
