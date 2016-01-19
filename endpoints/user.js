@@ -10,6 +10,7 @@ const ErrorResponse = require('../common/error-response');
 
 // models
 const User = require('../models/user');
+const Todo = require('../models/todo');
 
 module.exports = (app) => {
 
@@ -27,7 +28,7 @@ module.exports = (app) => {
                 };
                 res.json(new Response(response));
             } else {
-                res.json(new ErrorResponse());
+                res.json(new ErrorResponse(null, 'DB Error'));
             }
         });
     });
@@ -40,7 +41,7 @@ module.exports = (app) => {
 
         User.findOne({ username: username }, (err, user) => {
             if (err) {
-                res.json(new ErrorResponse());
+                res.json(new ErrorResponse(null, 'DB Error'));
             } else if (!user) {
                 res.json(new Response(false));
             } else if (!user.validPassword(password)) {
@@ -61,9 +62,9 @@ module.exports = (app) => {
         let user = new User({ username: username, password: password });
         user.save((err) => {
             if (!err) {
-                res.json(new Response());
+                res.json(new Response('User created'));
             } else {
-                res.json(new ErrorResponse());
+                res.json(new ErrorResponse(null, 'DB Error'));
             }
         });
     });
@@ -71,14 +72,21 @@ module.exports = (app) => {
     router.delete('/', app.get('auth').authenticate('basic', { session : false }), (req, res, next) => {
 
         // get params
+        let userId = req.user.id;
         let username = req.user.username;
 
         // remove user
         User.remove({ username: username }, (err) => {
             if (!err) {
-                res.json(new Response());
+                Todo.remove({ userId: userId }, (err) => {
+                    if (!err) {
+                        res.json(new Response('User deleted'));
+                    } else {
+                        res.json(new ErrorResponse(null, 'DB Error'));
+                    }
+                });
             } else {
-                res.json(new ErrorResponse());
+                res.json(new ErrorResponse(null, 'DB Error'));
             }
         });
     });

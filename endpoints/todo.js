@@ -30,7 +30,7 @@ module.exports = (app) => {
                 });
                 res.json(new Response(response));
             } else {
-                res.json(new ErrorResponse());
+                res.json(new ErrorResponse(null, 'DB Error'));
             }
         });
     });
@@ -46,9 +46,9 @@ module.exports = (app) => {
         let todo = new Todo({ userId: userId, done: done, text: text });
         todo.save((err) => {
             if (!err) {
-                res.json(new Response());
+                res.json(new Response('Todo created'));
             } else {
-                res.json(new ErrorResponse());
+                res.json(new ErrorResponse(null, 'DB Error'));
             }
         });
     });
@@ -67,9 +67,9 @@ module.exports = (app) => {
             todo.text = text;
             todo.save((err) => {
                 if (!err) {
-                    res.json(new Response())
+                    res.json(new Response('Todo updated'));
                 } else {
-                    res.json(new ErrorResponse());
+                    res.json(new ErrorResponse(null, 'DB Error'));
                 }
             });
         });
@@ -81,12 +81,12 @@ module.exports = (app) => {
         let userId = req.user.id;
         let id = req.params[0];
 
-        // remove user
+        // remove todo
         Todo.remove({ _id: id, userId: userId }, (err) => {
             if (!err) {
-                res.json(new Response());
+                res.json(new Response('Todo deleted'));
             } else {
-                res.json(new ErrorResponse());
+                res.json(new ErrorResponse(null, 'DB Error'));
             }
         });
     });
